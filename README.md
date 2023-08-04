@@ -8,5 +8,6 @@
 ## 작업 환경
 1. Dev Tool Version : Visual Studio 2022
 2. Windows SDK Version : 10.0.22000.0
-
+   
+## 실행 화면
 ![image](https://github.com/jmlee0717/Glim_Project/assets/105495287/2bbc6516-2586-4d56-9390-bdb03e3e64dd)

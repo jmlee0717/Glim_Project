@@ -182,13 +182,12 @@ void CglimprojDlg::OnBnClickedDrawBtn()
 	CRect rectClient;
 	m_GroundStatic.GetClientRect(rectClient);
 
-	// 랜덤한 위치를 구하여 x, y 좌표를 구한다.
-	// 
+	// 랜덤한 위치를 구하여 x, y 좌표를 구한다. -> rectClient 영역안에 x,y 좌표가 설정 되도록 처리
 	//1) (rectClient.right - 2 * m_nRadius): 객체 반경의 두 배(지금).이렇게 하면 개체의 중심이 클라이언트 영역의 오른쪽 가장자리에서 m_nRadius 거리 이상 떨어져 있음.
 	//2) rand() % (rectClient.right - 2 * m_nRadius) : [0, rectClient.right - 2 * m_nRadius) 범위의 임의 값을 생성.
-	//3) + m_nRadius/4: m_nRadius를 무작위 랜덤 값에 추가하여 중심이 클라이언트 영역의 왼쪽 가장자리에서 최소 m_nRadius 거리에 있도록 함. 왼쪽에 원을 더 근접하려면 값을 더 줄이면 됨
-	m_nPointx = rand() % (rectClient.right -  2* m_nRadius) + m_nRadius/4;
-	m_nPointy = rand() % (rectClient.bottom - 2 * m_nRadius) + m_nRadius/4;
+	//3) + m_nRadius: m_nRadius를 무작위 랜덤 값에 추가하여 중심이 클라이언트 영역의 왼쪽 가장자리에서 최소 m_nRadius 거리에 있도록 함
+	m_nPointx = rand() % (rectClient.right -  2* m_nRadius) + m_nRadius;
+	m_nPointy = rand() % (rectClient.bottom - 2 * m_nRadius) + m_nRadius;
 
 	// 위의 적용한 내용을 OnPaint에서 실행하기 위한 플래그값 setting
 	m_bDrawFlag = TRUE;
@@ -199,20 +198,51 @@ void CglimprojDlg::OnBnClickedDrawBtn()
 void CglimprojDlg::drawData(CDC* pDC)
 {
 	CRect rect;
-	CPen pen;
-	pen.CreatePen(PS_SOLID, 5, RGB(255, 255, 0));
-	CPen* pOldPen = pDC->SelectObject(&pen);
-	// 랜덤한 위치를 구한 x, y 좌표에 반지름 만큼의 width 와 height를 할당한 rect 영역을 지정.
 	rect.SetRect(m_nPointx, m_nPointy, m_nPointx + m_nRadius, m_nPointy + m_nRadius);
-	pDC->Ellipse(rect);
-	pDC->SelectObject(pOldPen);
 
 	// 랜덤한 rect 영역의 중심 좌표를 구함.
 	m_CenterPt.x = (rect.left + rect.right) / 2;
 	m_CenterPt.y = (rect.top + rect.bottom) / 2;
 
+	// 원이 그려질 CStatic 영역의 좌표를 구함
+	CRect rectClient;
+	m_GroundStatic.GetClientRect(rectClient);
 
+	if (m_CenterPt.x > rectClient.right || m_CenterPt.x < rectClient.left)
+	{
+		displayText(pDC, _T("원의 중심 좌표가 클라이언트 영역을 벗어납니다"));
+		//AfxMessageBox(L"원의 중심좌표가 영역을 벗어납니다.");
+		return;
+	}
+
+	if (m_CenterPt.y > rectClient.bottom || m_CenterPt.y < rectClient.top)
+	{
+		displayText(pDC, _T("원의 중심 좌표가 클라이언트 영역을 벗어납니다"));
+		//AfxMessageBox(L"원의 중심좌표가 영역을 벗어납니다.");
+		return;
+	}
+
+	drawCircle(pDC, rect);
 	drawCenter(pDC);
+}
+
+void CglimprojDlg::drawCircle(CDC* pDC, CRect rect)
+{
+	CPen pen;
+	pen.CreatePen(PS_SOLID, 3, RGB(0, 255, 255));
+	CPen* pOldPen = pDC->SelectObject(&pen);
+
+	CBrush brush(RGB(255, 255, 0)); // 초록색 브러시 생성
+	CBrush* pOldBrush = pDC->SelectObject(&brush);
+
+	// 원안을 초록색으로 색칠하기
+	pDC->Ellipse(m_CenterPt.x - m_nRadius / 2, m_CenterPt.y - m_nRadius / 2, m_CenterPt.x + m_nRadius / 2, m_CenterPt.y + m_nRadius / 2);
+
+	// 랜덤한 위치를 구한 x, y 좌표에 반지름 만큼의 width 와 height를 할당한 rect 영역을 지정.
+	pDC->Ellipse(rect);
+
+	pDC->SelectObject(pOldPen);
+	pDC->SelectObject(pOldBrush);
 }
 
 void CglimprojDlg::drawCenter(CDC* pDC)
@@ -235,4 +265,28 @@ void CglimprojDlg::drawCenter(CDC* pDC)
 	pDC->LineTo(m_CenterPt.x + 10, m_CenterPt.y);
 
 	pDC->SelectObject(pOldPen);
+
+	displayText(pDC, _T("원의 중심 좌표"));
 }
+
+void CglimprojDlg::DrawFillColorCircle()
+{
+	CDC* pDC = GetDC();
+	CBrush brush(RGB(0, 255, 0)); // 초록색 브러시 생성
+	CBrush* pOldBrush = pDC->SelectObject(&brush);
+	// 원안을 초록색으로 색칠하기
+	pDC->Ellipse(m_CenterPt.x - m_nRadius/2, m_CenterPt.y - m_nRadius/2, m_CenterPt.x + m_nRadius/2, m_CenterPt.y + m_nRadius/2);
+
+	pDC->SelectObject(pOldBrush);
+}
+
+void CglimprojDlg::displayText(CDC* pDC, CString strMsg)
+{
+	CString strMessage;
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(RGB(255, 0, 0));
+	pDC->SetTextAlign(TA_LEFT);
+	strMessage.Format(L"%s (x=%d, y=%d)", strMsg, m_CenterPt.x, m_CenterPt.y);
+	pDC->TextOut(20, 20, strMessage);
+}
+

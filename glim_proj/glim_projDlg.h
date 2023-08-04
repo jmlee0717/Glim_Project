@@ -36,8 +36,10 @@ public:
 
 private:
 	void drawData(CDC* pDC);
+	void drawCircle(CDC* pDC, CRect rect);
 	void drawCenter(CDC* pDC);
-	void SetRectInit();
+	void DrawFillColorCircle();
+	void displayText(CDC* pDC, CString strMsg);
 
 	CImage	m_image;
 	int m_nRadius;

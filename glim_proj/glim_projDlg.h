@@ -33,18 +33,19 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedDrawBtn();
-
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 private:
 	void drawData(CDC* pDC);
 	void drawCircle(CDC* pDC, CRect rect);
 	void drawCenter(CDC* pDC);
-	void DrawFillColorCircle();
 	void displayText(CDC* pDC, CString strMsg);
 
-	CImage	m_image;
-	int m_nRadius;
-	CPoint m_CenterPt;
-	int m_nPointx, m_nPointy;
-	CStatic	m_GroundStatic;
-	BOOL m_bDrawFlag = FALSE;
+	CImage		m_image;
+	int			m_nRadius;
+	CPoint		m_CenterPt;
+	int			m_nPointx, m_nPointy;
+	CStatic		m_GroundStatic;
+	BOOL		m_bDrawFlag = FALSE;
+	CRect		m_rectClient;
+
 };

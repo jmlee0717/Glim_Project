@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CglimprojDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_DRAW_BTN, &CglimprojDlg::OnBnClickedDrawBtn)
+	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
@@ -195,6 +196,7 @@ void CglimprojDlg::OnBnClickedDrawBtn()
 
 }
 
+// 원을 그리고 중심좌표를 그리는 메인 함수
 void CglimprojDlg::drawData(CDC* pDC)
 {
 	CRect rect;
@@ -206,26 +208,21 @@ void CglimprojDlg::drawData(CDC* pDC)
 
 	// 원이 그려질 CStatic 영역의 좌표를 구함
 	CRect rectClient;
-	m_GroundStatic.GetClientRect(rectClient);
+	// 전체 윈도우 기준으로 m_GroundStatic의 실제 영역 좌표
+	m_GroundStatic.GetWindowRect(rectClient);
+	// 현재 다이얼로그 기준으로 m_GroundStatic가 위치한 상대적인 영역 좌표
+	ScreenToClient(rectClient);
 
-	if (m_CenterPt.x > rectClient.right || m_CenterPt.x < rectClient.left)
+	if (rectClient.PtInRect(m_CenterPt))
 	{
-		displayText(pDC, _T("원의 중심 좌표가 클라이언트 영역을 벗어납니다"));
-		//AfxMessageBox(L"원의 중심좌표가 영역을 벗어납니다.");
-		return;
+		drawCircle(pDC, rect);
+		drawCenter(pDC);
 	}
-
-	if (m_CenterPt.y > rectClient.bottom || m_CenterPt.y < rectClient.top)
-	{
+	else
 		displayText(pDC, _T("원의 중심 좌표가 클라이언트 영역을 벗어납니다"));
-		//AfxMessageBox(L"원의 중심좌표가 영역을 벗어납니다.");
-		return;
-	}
-
-	drawCircle(pDC, rect);
-	drawCenter(pDC);
 }
 
+// 원을 그리고 색칠하는 메인 함수
 void CglimprojDlg::drawCircle(CDC* pDC, CRect rect)
 {
 	CPen pen;
@@ -245,6 +242,7 @@ void CglimprojDlg::drawCircle(CDC* pDC, CRect rect)
 	pDC->SelectObject(pOldBrush);
 }
 
+// 원의 중심을 표출하는 함수
 void CglimprojDlg::drawCenter(CDC* pDC)
 {
 	CPen pen(PS_SOLID, 2, RGB(255, 0, 0)); // 빨간색 펜 생성
@@ -269,24 +267,55 @@ void CglimprojDlg::drawCenter(CDC* pDC)
 	displayText(pDC, _T("원의 중심 좌표"));
 }
 
-void CglimprojDlg::DrawFillColorCircle()
-{
-	CDC* pDC = GetDC();
-	CBrush brush(RGB(0, 255, 0)); // 초록색 브러시 생성
-	CBrush* pOldBrush = pDC->SelectObject(&brush);
-	// 원안을 초록색으로 색칠하기
-	pDC->Ellipse(m_CenterPt.x - m_nRadius/2, m_CenterPt.y - m_nRadius/2, m_CenterPt.x + m_nRadius/2, m_CenterPt.y + m_nRadius/2);
-
-	pDC->SelectObject(pOldBrush);
-}
-
+// 실시간으로 현재 좌표에 대한 정보를 화면에 표출
 void CglimprojDlg::displayText(CDC* pDC, CString strMsg)
 {
+	CRect rectClient;
+	// 전체 윈도우 기준으로 m_GroundStatic의 실제 영역 좌표
+	m_GroundStatic.GetWindowRect(rectClient);
+	// 현재 다이얼로그 기준으로 m_GroundStatic가 위치한 상대적인 영역 좌표
+	ScreenToClient(rectClient);
 	CString strMessage;
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(RGB(255, 0, 0));
 	pDC->SetTextAlign(TA_LEFT);
-	strMessage.Format(L"%s (x=%d, y=%d)", strMsg, m_CenterPt.x, m_CenterPt.y);
+	strMessage.Format(L"%s (x=%d, y=%d)", strMsg, m_CenterPt.x - rectClient.left, m_CenterPt.y - rectClient.top);
 	pDC->TextOut(20, 20, strMessage);
 }
 
+//마우스를 클릭시 좌표를 기준으로 원을 그리는 함수
+void CglimprojDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	// 원이 그려질 CStatic 영역의 좌표를 구함
+	CRect rectClient;
+	// 전체 윈도우 기준으로 m_GroundStatic의 실제 영역 좌표
+	m_GroundStatic.GetWindowRect(rectClient);
+	// 현재 다이얼로그 기준으로 m_GroundStatic가 위치한 상대적인 영역 좌표
+	ScreenToClient(rectClient);
+
+	CString strRadius;
+	GetDlgItem(IDC_RADIUS_EDIT)->GetWindowTextW(strRadius);
+
+	if (strRadius.IsEmpty())
+	{
+		AfxMessageBox(L"원의 반지름을 입력하세요");
+		return;
+	}
+
+	std::wstring wstrRadius = strRadius;
+	m_nRadius = std::stoi(wstrRadius);
+
+	// 현재 다이얼로그 기준으로 m_GroundStatic가 위치한 상대적인 영역 좌표 내에 마우스 포인트가 있는지 체크
+	if (rectClient.PtInRect(point))
+	{
+		m_nPointx = point.x - m_nRadius / 2;
+		m_nPointy = point.y - m_nRadius / 2;
+
+		m_bDrawFlag = TRUE;
+		Invalidate();
+	}
+
+	CDialogEx::OnLButtonDown(nFlags, point);
+}

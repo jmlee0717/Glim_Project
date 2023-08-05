@@ -41,11 +41,9 @@ private:
 	void displayText(CDC* pDC, CString strMsg);
 
 	CImage		m_image;
-	int			m_nRadius;
+	int			m_nSize;
 	CPoint		m_CenterPt;
 	int			m_nPointx, m_nPointy;
 	CStatic		m_GroundStatic;
 	BOOL		m_bDrawFlag = FALSE;
-	CRect		m_rectClient;
-
 };

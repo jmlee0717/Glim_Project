@@ -14,5 +14,6 @@
 2. Windows SDK Version : 10.0.22000.0
    
 ## 실행 화면
-![image](https://github.com/jmlee0717/Glim_Project/assets/105495287/d6d65e1a-223c-453c-ac6d-3a0ae4767963)
+
+![image](https://github.com/jmlee0717/Glim_Project/assets/105495287/e71ba2e3-99ff-41e4-84ff-bbdd6ef19f69)
 

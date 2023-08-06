@@ -238,7 +238,7 @@ void CglimprojDlg::drawCircle(CDC* pDC, CRect rect)
 	pDC->SelectObject(pOldBrush);
 }
 
-// 원의 중심을 표출하는 함수
+// 원의 중심을 표출(십자표시)하는 함수
 void CglimprojDlg::drawCenter(CDC* pDC)
 {
 	CPen pen(PS_SOLID, 2, RGB(255, 0, 0)); // 빨간색 펜 생성
@@ -263,7 +263,7 @@ void CglimprojDlg::drawCenter(CDC* pDC)
 	displayText(pDC, _T("원의 중심 좌표"));
 }
 
-// 실시간으로 현재 좌표에 대한 정보를 화면에 표출
+// 실시간으로 현재 좌표에 대한 정보를 화면상단에 표출
 void CglimprojDlg::displayText(CDC* pDC, CString strMsg)
 {
 	CRect rectClient;

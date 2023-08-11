@@ -15,5 +15,6 @@
    
 ## 실행 화면
 
-![image](https://github.com/jmlee0717/Glim_Project/assets/105495287/e71ba2e3-99ff-41e4-84ff-bbdd6ef19f69)
+![image](https://github.com/jmlee0717/Glim_Project/assets/105495287/bcc4eef0-7395-43da-ac8e-fa9086475fb0)
+
 

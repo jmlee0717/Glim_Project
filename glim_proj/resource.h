@@ -7,7 +7,6 @@
 #define IDS_ABOUTBOX                    101
 #define IDD_GLIM_PROJ_DIALOG            102
 #define IDR_MAINFRAME                   128
-#define IDC_RADIUS_EDIT                 1000
 #define IDC_SIZE_EDIT                   1000
 #define IDC_BUTTON1                     1001
 #define IDC_DRAW_BTN                    1001
